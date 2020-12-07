@@ -1,0 +1,14 @@
+[Unit]
+Description=gcp-gpu-metrics
+Wants=network.target
+After=network.target
+
+[Service]
+StartLimitInterval=3
+Type=simple
+Restart=on-failure
+RestartSec=10s
+ExecStart=/usr/local/bin/gcp-gpu-metrics --enable-nvidiasmi-pm --service-account-path /root/service-account.json
+
+[Install]
+WantedBy=multi-user.target

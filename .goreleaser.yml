@@ -1,0 +1,54 @@
+project_name: gcp-gpu-metrics
+
+builds:
+  -
+    id: gcp-gpu-metrics
+
+    main: ./
+
+    binary: gcp-gpu-metrics
+
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+
+    flags:
+      - -mod=vendor
+
+    ldflags:
+      - -s
+      - -w
+      - -X {{.Env.VERSION_PKG}}.Commit={{.Env.LAST_COMMIT}} -X {{.Env.VERSION_PKG}}.Version={{.Env.VERSION}}
+
+    #hooks:
+    #  post: ./hack/upx.sh
+
+    goos:
+      - linux
+
+    goarch:
+      - amd64
+
+checksum:
+  name_template: '{{ .ProjectName }}_checksums.txt'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^clear:'
+
+archives:
+  -
+    id: gcp-gpu-metrics
+    name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    replacements:
+      linux: Linux
+      amd64: x86_64
+
+release:
+  github:
+    owner: instadeepai
+    name: gcp-gpu-metrics
