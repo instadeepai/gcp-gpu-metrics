@@ -8,10 +8,10 @@ Tiny Go binary that aims to export Nvidia GPU metrics to GCP monitoring, based o
 
 At this moment, there is no automated install script.
 
-You can download [a release/binary from this page](https://github.com/instadeepai/gcp-gpu-metrics/releases).
+You can download a [release/binary from this page](https://github.com/instadeepai/gcp-gpu-metrics/releases).
 
 About requirements, you only need the `nvidia-smi` binary installed on your GCE instance. 
-Protip: You can use [a machine learning images](https://cloud.google.com/ai-platform/deep-learning-vm/docs/images) provided by GCP.
+Protip: You can use a [machine learning image](https://cloud.google.com/ai-platform/deep-learning-vm/docs/images) provided by GCP.
 
 ## Usage 💻
 
@@ -35,20 +35,20 @@ Available env variables:
 
 Priority order is `binary flag` ➡️ `env var` ➡️ `default value`.
 
-Nvidia-smi persistence mod is very useful, the option permits to run `nvidia-smi` as a daemon in background to prevent 100% of GPU load at each request. Enable this option requires root.
+Nvidia-smi persistence mod is very useful, the option permits to run `nvidia-smi` as a daemon in background to prevent 100% of GPU load at each request. Enabling this option requires root.
 
 ## Metrics 📈
 
-There is 6 differents metrics fetched, it will growth in the future.
+There are 6 differents metrics fetched, this number will grow in the future.
 
 * `temperature.gpu` as `custom.googleapis.com/gpu/temperature_gpu` | Core GPU temperature. in degrees C.
-* `utilization.gpu` as `custom.googleapis.com/gpu/utilization_gpu` | Percent of time over the past sample period during which one or more kernels was executing on the GPU.
+* `utilization.gpu` as `custom.googleapis.com/gpu/utilization_gpu` | Percent of time over the past sample period during which one or more kernels were executed on the GPU.
 * `utilization.memory` as `custom.googleapis.com/gpu/utilization_memory` | Percent of time over the past sample period during which global (device) memory was being read or written.
 * `memory.total` as `custom.googleapis.com/gpu/memory_total` | Total installed GPU memory.
 * `memory.free` as `custom.googleapis.com/gpu/memory_free` | Total GPU free memory.
 * `memory.used` as `custom.googleapis.com/gpu/memory_used` | Total memory allocated by active contexts.
 
-For the moment, gcp-gpu-metrics send an average of any metrics if you have more than 1 GPU.
+For the moment, gcp-gpu-metrics sends an average of any metrics if you have more than 1 GPU.
 
 ## Compile gcp-gpu-metrics ⚙
 
