@@ -4,14 +4,23 @@
 
 Tiny Go binary that aims to export Nvidia GPU metrics to GCP monitoring, based on nvidia-smi.
 
-## Install and requirements ⏬
+## Requirements ⚓
 
-At this moment, there is no automated install script.
+* Your machine must be a GCE (Google Compute Engine) instance.
+* Your Service Account must have the `Monitoring Metric Writer` permission.
+* You need the `nvidia-smi` binary installed on your GCE instance.
 
-You can download a [release/binary from this page](https://github.com/instadeepai/gcp-gpu-metrics/releases).
 
-About requirements, you only need the `nvidia-smi` binary installed on your GCE instance. 
-Protip: You can use a [machine learning image](https://cloud.google.com/ai-platform/deep-learning-vm/docs/images) provided by GCP.
+Protip: You can use a [machine learning image](https://cloud.google.com/ai-platform/deep-learning-vm/docs/images) provided by GCP as default image.
+
+## Install ⏬
+
+If you're root, you can install the latest binary version using the following script:
+```bash
+$ bash -e < <(curl -sSL https://raw.githubusercontent.com/instadeepai/gcp-gpu-metrics/master/install-latest.sh)
+```
+
+Or, you can download a [release/binary from this page](https://github.com/instadeepai/gcp-gpu-metrics/releases) and install it manually.
 
 ## Usage 💻
 
