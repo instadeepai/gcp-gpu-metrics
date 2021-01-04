@@ -39,6 +39,7 @@ changelog:
       - '^docs:'
       - '^test:'
       - '^clear:'
+      - '^tools:'
 
 archives:
   -
