@@ -66,18 +66,21 @@ func main() {
 		os.Exit(0)
 	}
 
+	// init syslogger
 	slog, err := newSyslogger()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
+	// check if nvidia-smi binary is present on the instance
 	if err := isNvidiasmiExist(); err != nil {
 		_ = slog.Err(err.Error())
 		os.Exit(1)
 	}
 	_ = slog.Info("nvidia-smi detected")
 
+	// enable nvidia-smi persistence mod
 	if flagEnableNvidiasmipm {
 		if err := enablePMNvidiasmi(); err != nil {
 			_ = slog.Info(err.Error())
@@ -86,13 +89,15 @@ func main() {
 		}
 	}
 
-	amount, err := getGPUsAmount()
+	// get GPU amount on the instance
+	gpuAmount, err := getGPUAmount()
 	if err != nil {
 		_ = slog.Err(err.Error())
 		os.Exit(1)
 	}
-	_ = slog.Info(fmt.Sprintf("%d GPU(s) detected\n", amount))
+	_ = slog.Info(fmt.Sprintf("%d GPU(s) detected\n", gpuAmount))
 
+	// create a new GCP auth service
 	s, err := newService(slog)
 	if err != nil {
 		_ = slog.Err(err.Error())
@@ -101,12 +106,14 @@ func main() {
 
 	defer s.Close()
 
-	if err := s.createMetricDescriptor(); err != nil {
+	// creation loop of metrics descriptors
+	if err := s.createMetricsDescriptors(); err != nil {
 		_ = slog.Err(err.Error())
 		os.Exit(1)
 	}
 
-	s.fetchMetricsLoop()
+	// fetch metrics infinite loop
+	s.fetchMetrics(gpuAmount)
 
 	os.Exit(0)
 }
