@@ -11,8 +11,8 @@ import (
 var (
 	// flags related
 
-	flagDisplayVersion       bool
-	flagServiceAccountPath   string = "./service-account.json"
+	flagDisplayVersion       bool   = false
+	flagServiceAccountPath   string = ""
 	flagFetchMetricsInterval uint64 = 10
 	flagEnableNvidiasmipm    bool   = false
 
@@ -54,7 +54,7 @@ func evaluateEnvVars() {
 func main() {
 	evaluateEnvVars()
 
-	flag.BoolVar(&flagDisplayVersion, "version", false, "Display current version/release and commit hash.")
+	flag.BoolVar(&flagDisplayVersion, "version", flagDisplayVersion, "Display current version/release and commit hash.")
 	flag.StringVar(&flagServiceAccountPath, "service-account-path", flagServiceAccountPath, "GCP service account path.")
 	flag.Uint64Var(&flagFetchMetricsInterval, "metrics-interval", flagFetchMetricsInterval, "Fetch metrics interval in seconds.")
 	flag.BoolVar(&flagEnableNvidiasmipm, "enable-nvidiasmi-pm", flagEnableNvidiasmipm, "Enable persistant mod for nvidia-smi.")

@@ -31,7 +31,15 @@ type service struct {
 
 func newService(slog *syslog.Writer) (*service, error) {
 	ctx := context.Background()
-	client, err := monitoring.NewMetricClient(ctx, option.WithCredentialsFile(flagServiceAccountPath))
+
+	var client *monitoring.MetricClient
+	var err error
+
+	if flagServiceAccountPath == "" {
+		client, err = monitoring.NewMetricClient(ctx)
+	} else {
+		client, err = monitoring.NewMetricClient(ctx, option.WithCredentialsFile(flagServiceAccountPath))
+	}
 	if err != nil {
 		return nil, err
 	}
