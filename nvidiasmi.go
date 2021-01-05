@@ -64,8 +64,8 @@ func (q *nvidiasmiQuery) gcpFormat() string {
 	return strings.ReplaceAll(q.Name, ".", "_")
 }
 
-func getGPUsAmount() (int, error) {
-	o, err := exec.Command("/bin/bash",
+func getGPUAmount() (int, error) {
+	o, err := exec.Command("/bin/sh",
 		"-c",
 		"nvidia-smi --query-gpu=index -u --format=csv,noheader",
 	).Output()
@@ -81,11 +81,20 @@ func getGPUsAmount() (int, error) {
 	return amount, nil
 }
 
-func getGPUsMetric(query string) (int64, string, error) {
-	o, err := exec.Command("/bin/bash",
+func getGPUMetric(query string, id int) (int64, string, error) {
+	var cmd string
+
+	if id >= 0 {
+		cmd = fmt.Sprintf("nvidia-smi --id=%d --query-gpu=%s -u --format=csv,noheader",
+			id, query)
+	} else {
+		cmd = fmt.Sprintf("nvidia-smi --query-gpu=%s -u --format=csv,noheader",
+			query)
+	}
+
+	o, err := exec.Command("/bin/sh",
 		"-c",
-		fmt.Sprintf("nvidia-smi --query-gpu=%s -u --format=csv,noheader",
-			query),
+		cmd,
 	).Output()
 	if err != nil {
 		return 0, "", err
@@ -123,9 +132,9 @@ func getGPUsMetric(query string) (int64, string, error) {
 }
 
 func isNvidiasmiExist() error {
-	o, err := exec.Command("/bin/bash",
+	o, err := exec.Command("/bin/sh",
 		"-c",
-		"nvidia-smi --query-gpu=pci.bus_id --format=csv,noheader",
+		"nvidia-smi --list-gpus",
 	).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("%s - %s", err.Error(), string(o))
@@ -137,7 +146,7 @@ func isNvidiasmiExist() error {
 // enablePMNvidiasmi aims to enable persistence mod on nvidia smi
 // to prevent 100% gpu usage on one GPU at each query
 func enablePMNvidiasmi() error {
-	o, err := exec.Command("/bin/bash",
+	o, err := exec.Command("/bin/sh",
 		"-c",
 		"sudo nvidia-smi -pm 1",
 	).Output()

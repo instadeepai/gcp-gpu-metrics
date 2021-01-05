@@ -57,7 +57,14 @@ There are 6 differents metrics fetched, this number will grow in the future.
 * `memory.free` as `custom.googleapis.com/gpu/memory_free` | Total GPU free memory.
 * `memory.used` as `custom.googleapis.com/gpu/memory_used` | Total memory allocated by active contexts.
 
-For the moment, gcp-gpu-metrics sends an average of any metrics if you have more than 1 GPU.
+It creates an amount of time series equal to GPU amount with the label `gpu_id` + a GPU average.
+
+Example for 2 GPUs with `temperature.gpu` query, it will create:
+| gpu_id | Value |
+|---|---|
+| gpu_0 | 50 |
+| gpu_1 | 60 |
+| gpu_avg | 55 |
 
 ## Compile gcp-gpu-metrics ⚙
 

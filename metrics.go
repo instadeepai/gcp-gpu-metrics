@@ -11,6 +11,7 @@ import (
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"google.golang.org/api/option"
+	label "google.golang.org/genproto/googleapis/api/label"
 	metric "google.golang.org/genproto/googleapis/api/metric"
 	monitoredres "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
@@ -88,7 +89,7 @@ func retrieveInstanceMetadata(mpath string) (string, error) {
 	return strings.Split(string(b), "\n")[0], nil
 }
 
-func (s *service) createMetricDescriptor() error {
+func (s *service) createMetricsDescriptors() error {
 	for _, query := range nvidiasmiQueries {
 		fquery := query.gcpFormat()
 
@@ -101,7 +102,13 @@ func (s *service) createMetricDescriptor() error {
 				ValueType:   query.Type,
 				Unit:        query.Unit,
 				Description: "gcp_gpu_metrics for " + fquery + " nvidia-smi query",
-				DisplayName: fquery,
+				Labels: []*label.LabelDescriptor{
+					{
+						Key:         "gpu_id",
+						ValueType:   label.LabelDescriptor_STRING,
+						Description: "related gpu_id for " + fquery + " metric",
+					},
+				},
 			},
 		}
 
@@ -118,28 +125,47 @@ func (s *service) createMetricDescriptor() error {
 	return nil
 }
 
-func (s *service) fetchMetricsLoop() {
+func (s *service) fetchMetrics(gpuAmount int) {
 	fmi := flagFetchMetricsInterval
 	_ = s.slog.Info(fmt.Sprintf("Start fetching metrics every %d seconds", fmi))
 
+	// infinite loop with fetch metrics interval * second sleep
 	for {
+
+		// iterate over nvidia-smi queries
 		for _, query := range nvidiasmiQueries {
-			value, _, err := getGPUsMetric(query.Name)
-			if err != nil {
-				fmt.Println(err)
+
+			// iterate over gpu ids
+			for id := 0; id < gpuAmount; id++ {
+				go s.fetchMetric(query, id)
 			}
 
-			s.createTimeSeries(value, &query)
+			// do a query for the gpus average
+			go s.fetchMetric(query, -1)
 		}
 
-		time.Sleep(time.Duration(flagFetchMetricsInterval) * time.Second)
+		time.Sleep(time.Duration(fmi) * time.Second)
 	}
 }
 
-func (s *service) createTimeSeries(value int64, q *nvidiasmiQuery) {
+func (s *service) fetchMetric(q nvidiasmiQuery, id int) {
+	value, _, err := getGPUMetric(q.Name, id)
+	if err != nil {
+		_ = s.slog.Err(err.Error())
+	}
+
+	s.createTimeSeries(value, &q, fmt.Sprint(id))
+}
+
+func (s *service) createTimeSeries(value int64, q *nvidiasmiQuery, id string) {
 	now := time.Now()
 
 	fquery := q.gcpFormat()
+
+	// dirty hack to set the label to average
+	if id == "-1" {
+		id = "avg"
+	}
 
 	req := &monitoringpb.CreateTimeSeriesRequest{
 		Name: "projects/" + s.projectID,
@@ -147,6 +173,9 @@ func (s *service) createTimeSeries(value int64, q *nvidiasmiQuery) {
 			{
 				Metric: &metric.Metric{
 					Type: "custom.googleapis.com/gpu/" + fquery,
+					Labels: map[string]string{
+						"gpu_id": "gpu_" + id,
+					},
 				},
 				Resource: &monitoredres.MonitoredResource{
 					Type: "gce_instance",
