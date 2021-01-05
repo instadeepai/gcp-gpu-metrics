@@ -8,7 +8,7 @@ StartLimitInterval=3
 Type=simple
 Restart=on-failure
 RestartSec=10s
-ExecStart=/usr/local/bin/gcp-gpu-metrics --enable-nvidiasmi-pm --service-account-path /root/service-account.json
+ExecStart=/usr/local/bin/gcp-gpu-metrics --enable-nvidiasmi-pm
 
 [Install]
 WantedBy=multi-user.target

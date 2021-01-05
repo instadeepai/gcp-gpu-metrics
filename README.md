@@ -7,7 +7,7 @@ Tiny Go binary that aims to export Nvidia GPU metrics to GCP monitoring, based o
 ## Requirements ⚓
 
 * Your machine must be a GCE (Google Compute Engine) instance.
-* Your Service Account must have the `Monitoring Metric Writer` permission.
+* The `Cloud API access scopes` of the instance or `Service Account` must have the `Monitoring Metric Writer` permission.
 * You need the `nvidia-smi` binary installed on your GCE instance.
 
 
@@ -17,7 +17,7 @@ Protip: You can use a [machine learning image](https://cloud.google.com/ai-platf
 
 If you're root, you can install the latest binary version using the following script:
 ```bash
-$ bash -e < <(curl -sSL https://raw.githubusercontent.com/instadeepai/gcp-gpu-metrics/master/install-latest.sh)
+$ bash < <(curl -sSL https://raw.githubusercontent.com/instadeepai/gcp-gpu-metrics/master/install-latest.sh)
 ```
 
 Or, you can download a [release/binary from this page](https://github.com/instadeepai/gcp-gpu-metrics/releases) and install it manually.
@@ -32,7 +32,7 @@ $ gcp-gpu-metrics
 
 Available flags:
 
-* `--service-account-path string` | GCP service account path. (default "./service-account.json")
+* `--service-account-path string` | GCP service account path. (default "")
 * `--metrics-interval uint` | Fetch metrics interval in seconds. (default 10)
 * `--enable-nvidiasmi-pm` | Enable persistence mod for nvidia-smi. (default false)
 * `--version` | Display current version/release and commit hash.
