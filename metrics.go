@@ -108,6 +108,11 @@ func (s *service) createMetricsDescriptors() error {
 						ValueType:   label.LabelDescriptor_STRING,
 						Description: "related gpu_id for " + fquery + " metric",
 					},
+					{
+						Key:         "bus_id",
+						ValueType:   label.LabelDescriptor_STRING,
+						Description: "related bus_id for " + fquery + " metric",
+					},
 				},
 			},
 		}
@@ -154,18 +159,22 @@ func (s *service) fetchMetric(q nvidiasmiQuery, id int) {
 		_ = s.slog.Err(err.Error())
 	}
 
-	s.createTimeSeries(value, &q, fmt.Sprint(id))
+	if id >= 0 {
+		busID, err := getGPUbusID(id)
+		if err != nil {
+			_ = s.slog.Err(err.Error())
+		}
+
+		s.createTimeSeries(value, &q, fmt.Sprint(id), busID)
+	} else {
+		s.createTimeSeries(value, &q, "avg", "null")
+	}
 }
 
-func (s *service) createTimeSeries(value int64, q *nvidiasmiQuery, id string) {
+func (s *service) createTimeSeries(value int64, q *nvidiasmiQuery, id string, busID string) {
 	now := time.Now()
 
 	fquery := q.gcpFormat()
-
-	// dirty hack to set the label to average
-	if id == "-1" {
-		id = "avg"
-	}
 
 	req := &monitoringpb.CreateTimeSeriesRequest{
 		Name: "projects/" + s.projectID,
@@ -175,6 +184,7 @@ func (s *service) createTimeSeries(value int64, q *nvidiasmiQuery, id string) {
 					Type: "custom.googleapis.com/gpu/" + fquery,
 					Labels: map[string]string{
 						"gpu_id": "gpu_" + id,
+						"bus_id": busID,
 					},
 				},
 				Resource: &monitoredres.MonitoredResource{

@@ -64,10 +64,14 @@ func (q *nvidiasmiQuery) gcpFormat() string {
 	return strings.ReplaceAll(q.Name, ".", "_")
 }
 
+const (
+	queryFormat string = "-u --format=csv,noheader"
+)
+
 func getGPUAmount() (int, error) {
 	o, err := exec.Command("/bin/sh",
 		"-c",
-		"nvidia-smi --query-gpu=index -u --format=csv,noheader",
+		"nvidia-smi --query-gpu=index "+queryFormat,
 	).Output()
 	if err != nil {
 		return 0, fmt.Errorf("%s - %s", err.Error(), string(o))
@@ -81,14 +85,27 @@ func getGPUAmount() (int, error) {
 	return amount, nil
 }
 
+func getGPUbusID(id int) (string, error) {
+	o, err := exec.Command("/bin/sh",
+		"-c",
+		fmt.Sprintf("nvidia-smi --query-gpu=pci.bus_id --id=%d "+queryFormat,
+			id),
+	).Output()
+	if err != nil {
+		return "", fmt.Errorf("%s - %s", err.Error(), string(o))
+	}
+
+	return strings.Split(string(o), "\n")[0], nil
+}
+
 func getGPUMetric(query string, id int) (int64, string, error) {
 	var cmd string
 
 	if id >= 0 {
-		cmd = fmt.Sprintf("nvidia-smi --id=%d --query-gpu=%s -u --format=csv,noheader",
+		cmd = fmt.Sprintf("nvidia-smi --id=%d --query-gpu=%s "+queryFormat,
 			id, query)
 	} else {
-		cmd = fmt.Sprintf("nvidia-smi --query-gpu=%s -u --format=csv,noheader",
+		cmd = fmt.Sprintf("nvidia-smi --query-gpu=%s "+queryFormat,
 			query)
 	}
 
