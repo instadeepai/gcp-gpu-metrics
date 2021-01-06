@@ -46,6 +46,8 @@ Priority order is `binary flag` ➡️ `env var` ➡️ `default value`.
 
 Nvidia-smi persistence mod is very useful, the option permits to run `nvidia-smi` as a daemon in background to prevent 100% of GPU load at each request. Enabling this option requires root.
 
+About logs, they're all located under syslog.
+
 ## Metrics 📈
 
 There are 6 differents metrics fetched, this number will grow in the future.
@@ -59,12 +61,14 @@ There are 6 differents metrics fetched, this number will grow in the future.
 
 It creates an amount of time series equal to GPU amount with the label `gpu_id` + a GPU average.
 
+A `bus_id` label also exist to identify your GPUs at hardware level.
+
 Example for 2 GPUs with `temperature.gpu` query, it will create:
-| gpu_id | Value |
-|---|---|
-| gpu_0 | 50 |
-| gpu_1 | 60 |
-| gpu_avg | 55 |
+| gpu_id | bus_id | Value |
+|---|---|---|
+| gpu_0 | 00000000:00:04.0 | 50 |
+| gpu_1 | 00000000:00:05.0 | 60 |
+| gpu_avg | null | 55 |
 
 ## Compile gcp-gpu-metrics ⚙
 
