@@ -24,10 +24,11 @@ const (
 
 type service struct {
 	*monitoring.MetricClient
-	zone       string
-	projectID  string
-	instanceID string
-	slog       *syslog.Writer
+	zone         string
+	projectID    string
+	instanceID   string
+	instanceName string
+	slog         *syslog.Writer
 }
 
 func newService(slog *syslog.Writer) (*service, error) {
@@ -50,7 +51,13 @@ func newService(slog *syslog.Writer) (*service, error) {
 		slog:         slog,
 	}
 
-	// Get projectID and zone by querying zone metadata server
+	// Get instance name by querying internal metadata server
+	name, err := retrieveInstanceMetadata("name")
+	if err != nil {
+		return nil, err
+	}
+
+	// Get projectID and zone by querying internal metadata server
 	mzone, err := retrieveInstanceMetadata("zone")
 	if err != nil {
 		return nil, err
@@ -58,8 +65,9 @@ func newService(slog *syslog.Writer) (*service, error) {
 
 	s.zone = strings.Split(mzone, "/")[3]
 	s.projectID = strings.Split(mzone, "/")[1]
+	s.instanceName = name
 
-	// Get instanceID by querying id metadata server
+	// Get instance ID by querying internal metadata server
 	mid, err := retrieveInstanceMetadata("id")
 	if err != nil {
 		return nil, err
@@ -71,7 +79,9 @@ func newService(slog *syslog.Writer) (*service, error) {
 }
 
 func retrieveInstanceMetadata(mpath string) (string, error) {
-	httpClient := &http.Client{}
+	httpClient := &http.Client{
+		Timeout: time.Second * 5,
+	}
 
 	req, _ := http.NewRequest("GET", metadataServer+mpath, nil)
 	req.Header.Set("Metadata-Flavor", "Google")
@@ -97,6 +107,7 @@ func (s *service) createMetricsDescriptors() error {
 			Name: "projects/" + s.projectID,
 			MetricDescriptor: &metric.MetricDescriptor{
 				Name:        fquery,
+				DisplayName: query.DisplayName,
 				Type:        "custom.googleapis.com/gpu/" + fquery,
 				MetricKind:  query.Kind,
 				ValueType:   query.Type,
@@ -112,6 +123,11 @@ func (s *service) createMetricsDescriptors() error {
 						Key:         "bus_id",
 						ValueType:   label.LabelDescriptor_STRING,
 						Description: "related bus_id for " + fquery + " metric",
+					},
+					{
+						Key:         "instance_name",
+						ValueType:   label.LabelDescriptor_STRING,
+						Description: "related instance_name for " + fquery + " metric",
 					},
 				},
 			},
@@ -183,8 +199,9 @@ func (s *service) createTimeSeries(value int64, q *nvidiasmiQuery, id string, bu
 				Metric: &metric.Metric{
 					Type: "custom.googleapis.com/gpu/" + fquery,
 					Labels: map[string]string{
-						"gpu_id": "gpu_" + id,
-						"bus_id": busID,
+						"gpu_id":        "gpu_" + id,
+						"bus_id":        busID,
+						"instance_name": s.instanceName,
 					},
 				},
 				Resource: &monitoredres.MonitoredResource{

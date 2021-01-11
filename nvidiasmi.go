@@ -11,10 +11,11 @@ import (
 )
 
 type nvidiasmiQuery struct {
-	Name string
-	Kind metric.MetricDescriptor_MetricKind
-	Type metric.MetricDescriptor_ValueType
-	Unit string
+	Name        string
+	DisplayName string
+	Kind        metric.MetricDescriptor_MetricKind
+	Type        metric.MetricDescriptor_ValueType
+	Unit        string
 }
 
 var (
@@ -22,40 +23,46 @@ var (
 
 	nvidiasmiQueries = []nvidiasmiQuery{
 		{
-			Name: "temperature.gpu",
-			Kind: metric.MetricDescriptor_GAUGE,
-			Type: metric.MetricDescriptor_INT64,
-			Unit: "1/{degres C}",
+			Name:        "temperature.gpu",
+			DisplayName: "Temperature GPU",
+			Kind:        metric.MetricDescriptor_GAUGE,
+			Type:        metric.MetricDescriptor_INT64,
+			Unit:        "1/{degres C}",
 		},
 		{
-			Name: "utilization.gpu",
-			Kind: metric.MetricDescriptor_GAUGE,
-			Type: metric.MetricDescriptor_INT64,
-			Unit: "%",
+			Name:        "utilization.gpu",
+			DisplayName: "Utilization GPU",
+			Kind:        metric.MetricDescriptor_GAUGE,
+			Type:        metric.MetricDescriptor_INT64,
+			Unit:        "%",
 		},
 		{
-			Name: "utilization.memory",
-			Kind: metric.MetricDescriptor_GAUGE,
-			Type: metric.MetricDescriptor_INT64,
-			Unit: "%",
+			Name:        "utilization.memory",
+			DisplayName: "Utilization Memory GPU",
+			Kind:        metric.MetricDescriptor_GAUGE,
+			Type:        metric.MetricDescriptor_INT64,
+			Unit:        "%",
 		},
 		{
-			Name: "memory.total",
-			Kind: metric.MetricDescriptor_GAUGE,
-			Type: metric.MetricDescriptor_INT64,
-			Unit: "MiBy",
+			Name:        "memory.total",
+			DisplayName: "Memory Total GPU",
+			Kind:        metric.MetricDescriptor_GAUGE,
+			Type:        metric.MetricDescriptor_INT64,
+			Unit:        "MiBy",
 		},
 		{
-			Name: "memory.free",
-			Kind: metric.MetricDescriptor_GAUGE,
-			Type: metric.MetricDescriptor_INT64,
-			Unit: "MiBy",
+			Name:        "memory.free",
+			DisplayName: "Memory Free GPU",
+			Kind:        metric.MetricDescriptor_GAUGE,
+			Type:        metric.MetricDescriptor_INT64,
+			Unit:        "MiBy",
 		},
 		{
-			Name: "memory.used",
-			Kind: metric.MetricDescriptor_GAUGE,
-			Type: metric.MetricDescriptor_INT64,
-			Unit: "MiBy",
+			Name:        "memory.used",
+			DisplayName: "Memory Used GPU",
+			Kind:        metric.MetricDescriptor_GAUGE,
+			Type:        metric.MetricDescriptor_INT64,
+			Unit:        "MiBy",
 		},
 	}
 )
