@@ -59,16 +59,23 @@ There are 6 differents metrics fetched, this number will grow in the future.
 * `memory.free` as `custom.googleapis.com/gpu/memory_free` | Total GPU free memory.
 * `memory.used` as `custom.googleapis.com/gpu/memory_used` | Total memory allocated by active contexts.
 
+
 It creates an amount of time series equal to GPU amount with the label `gpu_id` + a GPU average.
 
-A `bus_id` label also exist to identify your GPUs at hardware level.
+
+Here is a list of other labels:
+
+* `bus_id` | Identify your GPUs at hardware level.
+* `instance_name` | Identify instance name.
+
 
 Example for 2 GPUs with `temperature.gpu` query, it will create:
-| gpu_id | bus_id | Value |
-|---|---|---|
-| gpu_0 | 00000000:00:04.0 | 50 |
-| gpu_1 | 00000000:00:05.0 | 60 |
-| gpu_avg | null | 55 |
+
+| gpu_id | bus_id | instance_name | Value |
+|---|---|---|---|
+| gpu_0 | 00000000:00:04.0 | gcp-gpu-instance | 50 |
+| gpu_1 | 00000000:00:05.0 | gcp-gpu-instance | 60 |
+| gpu_avg | null | gcp-gpu-instance | 55 |
 
 ## Compile gcp-gpu-metrics ⚙
 
